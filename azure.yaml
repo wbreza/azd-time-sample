@@ -1,15 +1,21 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-name: todo-nodejs-mongo
+name: azd-time-sample
 metadata:
-  template: todo-nodejs-mongo@0.0.1-beta
+  template: azd-time-sample
 services:
-  web:
-    project: ./src/web
+  react-appservice:
+    project: ./src/sample
     dist: build
     language: js
     host: appservice
-  api:
-    project: ./src/api
+  # react-containerapp:
+  #   project: ./src/sample
+  #   dist: build
+  #   language: js
+  #   host: containerapp
+  react-staticwebapp:
+    project: ./src/sample
+    dist: build
     language: js
-    host: appservice
+    host: staticwebapp

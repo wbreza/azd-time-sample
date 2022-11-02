@@ -1,10 +1,19 @@
 param environmentName string
 param location string = resourceGroup().location
 param principalId string = ''
+param webImageName string = ''
 
 // The application frontend
-module web './app/web.bicep' = {
-  name: 'web'
+module swa './app/static-app.bicep' = {
+  name: 'swa'
+  params: {
+    environmentName: environmentName
+    location: location
+  }
+}
+
+module appservice './app/app-service.bicep' = {
+  name: 'appservice'
   params: {
     environmentName: environmentName
     location: location
@@ -13,44 +22,25 @@ module web './app/web.bicep' = {
   }
 }
 
-// The application backend
-module api './app/api.bicep' = {
-  name: 'api'
-  params: {
-    environmentName: environmentName
-    location: location
-    applicationInsightsName: monitoring.outputs.applicationInsightsName
-    appServicePlanId: appServicePlan.outputs.appServicePlanId
-    keyVaultName: keyVault.outputs.keyVaultName
-    allowedOrigins: [ web.outputs.WEB_URI ]
-    appSettings: {
-      AZURE_COSMOS_CONNECTION_STRING_KEY: cosmos.outputs.cosmosConnectionStringKey
-      AZURE_COSMOS_DATABASE_NAME: cosmos.outputs.cosmosDatabaseName
-      AZURE_COSMOS_ENDPOINT: cosmos.outputs.cosmosEndpoint
-    }
-  }
-}
+// module containerApps './core/host/container-apps.bicep' = {
+//   name: 'container-apps'
+//   params: {
+//     environmentName: environmentName
+//     location: location
+//     logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
+//   }
+// }
 
-// Give the API access to KeyVault
-module apiKeyVaultAccess './core/security/keyvault-access.bicep' = {
-  name: 'api-keyvault-access'
-  params: {
-    environmentName: environmentName
-    location: location
-    keyVaultName: keyVault.outputs.keyVaultName
-    principalId: api.outputs.API_IDENTITY_PRINCIPAL_ID
-  }
-}
-
-// The application database
-module cosmos './app/db.bicep' = {
-  name: 'cosmos'
-  params: {
-    environmentName: environmentName
-    location: location
-    keyVaultName: keyVault.outputs.keyVaultName
-  }
-}
+// module containerapp './app/container-app.bicep' = {
+//   name: 'containerapp'
+//   params: {
+//     environmentName: environmentName
+//     location: location
+//     imageName: webImageName
+//     containerAppsEnvironmentName: containerApps.outputs.containerAppsEnvironmentName
+//     containerRegistryName: containerApps.outputs.containerRegistryName
+//   }
+// }
 
 // Create an App Service Plan to group applications under the same payment plan and SKU
 module appServicePlan './core/host/appserviceplan.bicep' = {
@@ -83,10 +73,5 @@ module monitoring './core/monitor/monitoring.bicep' = {
   }
 }
 
-output API_URI string = api.outputs.API_URI
 output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString
-output AZURE_COSMOS_CONNECTION_STRING_KEY string = cosmos.outputs.cosmosConnectionStringKey
-output AZURE_COSMOS_DATABASE_NAME string = cosmos.outputs.cosmosDatabaseName
-output AZURE_COSMOS_ENDPOINT string = cosmos.outputs.cosmosEndpoint
 output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.keyVaultEndpoint
-output WEB_URI string = web.outputs.WEB_URI

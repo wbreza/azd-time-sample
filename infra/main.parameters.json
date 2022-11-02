@@ -10,6 +10,9 @@
     },
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
+    },
+    "webImageName": {
+      "value": "${SERVICE_WEB_IMAGE_NAME}"
     }
   }
 }
