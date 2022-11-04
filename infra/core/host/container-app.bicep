@@ -25,7 +25,7 @@ resource app 'Microsoft.App/containerApps@2022-03-01' = {
   name: '${abbrs.appContainerApps}${serviceName}-${resourceToken}'
   location: location
   tags: union(tags, { 'azd-service-name': serviceName })
-  identity: managedIdentity ? { type: 'SystemAssigned' } : null
+  identity: { type: managedIdentity ? 'SystemAssigned' : 'None' }
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {
